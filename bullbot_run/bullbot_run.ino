@@ -73,7 +73,7 @@ void loop() {
      omniDriveWithGyro(0,0,0);
     Serial.println("Left line detected → move right");
     delay(500);   // pause
-    omniDriveWithGyro(150, 0, 0);  // shift right
+    omniDrive(150, 0, 0);  // shift right
     delay(500);   // move a little bit
     omniDriveWithGyro(0,0,0);
    }
