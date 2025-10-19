@@ -325,15 +325,17 @@ void loop() {
     pixels.setPixelColor(1, pixels.Color(200, 200, 200));
     pixels.show();  // Send the updated pixel colors to the hardware.
     delay(1000);
-    omniDriveWithGyro(0, 0, 0);
+    for (int i = 0; i < 1000; i++) {
+      omniDriveWithGyro(0, 0, 0);
+      delay(1);
+    }
     // Optionally hold until cleared; here we stop and wait a bit
-    delay(1000);
     return;  // skip motion for this loop iteration
   }
 
   // Normal movement with gyro stabilization
   pixels.setPixelColor(0, pixels.Color(0, 0, 0));
-  pixels.setPixelColor(1, pixels.Color(0, 0,0));
+  pixels.setPixelColor(1, pixels.Color(0, 0, 0));
   pixels.show();  // Send the updated pixel colors to the hardware.
   omniDriveWithGyro(vx, vy, 0);
 
