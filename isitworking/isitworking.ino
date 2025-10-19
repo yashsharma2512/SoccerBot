@@ -19,9 +19,11 @@
 #define PCA9548A_ADDR 0x70
 #define APDS9960_ADDR 0x39
 const int neoPin = 23;
-
+const int neo = 7;
+const int num = 9;
 const int numPixels = 2;
 Adafruit_NeoPixel pixels(numPixels, neoPin, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel patches(num, neo, NEO_GRB + NEO_KHZ800);
 #define APDS_REG_ENABLE 0x80
 #define APDS_REG_ATIME 0x81
 #define APDS_REG_CONTROL 0x8F
@@ -52,7 +54,7 @@ float targetAngle = 0;
 float Kp = 5.0;
 
 // ---------------- APDS / PCA helpers ----------------
-uint8_t apdsChannels[2] = { 0, 1 };          // front, right
+uint8_t apdsChannels[3] = { 0, 1, 2 };       // front, right
 uint16_t ambientBaseline[2] = { 300, 300 };  // will be calibrated
 
 void selectPCAChannel(uint8_t channel) {
@@ -256,9 +258,19 @@ int ballPos() {
 void setup() {
   Serial.begin(115200);
   pixels.begin();
+  patches.begin();
+  patches.clear();
   pixels.clear();  // Set all pixel colors to 'off'
+  patches.show();
   pixels.show();   // Send the updated pixel colors to the hardware.
   delay(200);
+  patches.setBrightness(255);
+  for ( int i = 0; i<num;i++)
+  {
+    patches.setPixelColor(i,patches.Color(255,255,255));
+    delay(1);
+    patches.show();
+  }
 
   // motor pins
   for (int i = 0; i < 4; i++) {
@@ -285,7 +297,7 @@ void setup() {
   Serial.println("MPU ready");
 
   // Init both APDS sensors (fast mode)
-  for (uint8_t ch = 0; ch < 2; ch++) {
+  for (uint8_t ch = 0; ch < 3; ch++) {
     if (initAPDSFast(ch)) {
       Serial.print("APDS ch");
       Serial.print(ch);
@@ -300,7 +312,7 @@ void setup() {
   // Small delay then calibrate ambient on mat (place robot on green mat for calibration)
   delay(200);
   Serial.println("Calibrating ambient (place sensors over green mat)...");
-  for (uint8_t ch = 0; ch < 2; ch++) {
+  for (uint8_t ch = 0; ch < 3; ch++) {
     calibrateAmbient(ch, ambientBaseline[ch], 10);
   }
   Serial.println("Calibration complete.");
@@ -317,8 +329,9 @@ void loop() {
   // Read both sensors quickly and stop if white detected
   bool whiteFront = isWhiteDetected(0);
   bool whiteRight = isWhiteDetected(1);
+  bool whiteBack =  isWhiteDetected(2);
 
-  if (whiteFront || whiteRight) {
+    if  ( (whiteFront || whiteRight ) || whiteBack) {
     // Immediate stop
     Serial.println("WHITE detected! Stopping robot.");
     pixels.setPixelColor(0, pixels.Color(200, 200, 200));
